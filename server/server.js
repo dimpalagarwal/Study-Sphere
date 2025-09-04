@@ -1,23 +1,19 @@
-// server/server.js
-// import express from "express";
-// import cors from "cors";
-// import dotenv from "dotenv";
+import express from "express";
+import dotenv from "dotenv";
+import cors from "cors";
 
-// import videoRoutes from "./routes/videos.js";
-// import articleRoutes from "./routes/articles.js";
-// import mcqRoutes from "./routes/mcqs.js";
+import videosRoutes from "./routes/videos.js";
+import articlesRoutes from "./routes/articles.js";
 
-// dotenv.config();
+dotenv.config();
 
-// const app = express();
-// app.use(cors());
-// app.use(express.json());
+const app = express();
+app.use(cors());
+app.use(express.json());
 
-// // Routes
-// app.use("/api/videos", videoRoutes);
-// app.use("/api/articles", articleRoutes);
-// app.use("/api/mcqs", mcqRoutes);
+// Routes
+app.use("/api/videos", videosRoutes);
+app.use("/api/articles", articlesRoutes);
 
-// // Start Server
-// const PORT = process.env.PORT || 5000;
-// app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

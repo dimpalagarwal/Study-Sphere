@@ -6,11 +6,19 @@ import { SummaryCard } from "./summary-card";
 import { MCQs } from "./tab-mcqs";
 
 export function ResultsTabs({ query, results }) {
+  // Ensure results object always has defaults
+  const safeResults = {
+    videos: results?.videos || [],
+    articles: results?.articles || [],
+    summary: results?.summary || "",
+    mcqs: results?.mcqs || [],
+  };
+
   return (
     <Tabs defaultValue="videos" className="w-full">
       <div className="flex items-center justify-between">
         <h2 className="text-balance text-xl font-semibold text-gray-900">
-          Results for “{query.trim() || "Photosynthesis"}”
+          Results for “{query?.trim() || "Photosynthesis"}”
         </h2>
       </div>
 
@@ -23,7 +31,7 @@ export function ResultsTabs({ query, results }) {
 
       <TabsContent value="videos" className="mt-6">
         <GridCards>
-          {results.videos.map((v) => (
+          {safeResults.videos.map((v) => (
             <VideoCard key={v.id} item={v} />
           ))}
         </GridCards>
@@ -31,18 +39,18 @@ export function ResultsTabs({ query, results }) {
 
       <TabsContent value="articles" className="mt-6">
         <GridCards>
-          {results.articles.map((a) => (
+          {safeResults.articles.map((a) => (
             <ArticleCard key={a.id} item={a} />
           ))}
         </GridCards>
       </TabsContent>
 
       <TabsContent value="summary" className="mt-6">
-        <SummaryCard text={results.summary} />
+        <SummaryCard text={safeResults.summary} />
       </TabsContent>
 
       <TabsContent value="mcqs" className="mt-6">
-        <MCQs questions={results.mcqs} />
+        <MCQs questions={safeResults.mcqs} />
       </TabsContent>
     </Tabs>
   );
@@ -53,24 +61,45 @@ function GridCards({ children }) {
 }
 
 function VideoCard({ item }) {
+  const [showPlayer, setShowPlayer] = React.useState(false);
+
   return (
     <Card className="overflow-hidden rounded-xl border-gray-200">
-      <img
-        src={item.thumbnail || "/placeholder.svg?height=160&width=320&query=video%20thumbnail"}
-        alt={`Thumbnail for ${item.title}`}
-        className="h-40 w-full object-cover"
-      />
+      <img src={item.thumbnail} alt={item.title} className="h-40 w-full object-cover" />
       <CardHeader>
         <CardTitle className="text-base text-gray-900">{item.title}</CardTitle>
       </CardHeader>
-      <CardContent className="text-sm text-gray-600">
-        {item.duration && <p>Duration: {item.duration}</p>}
-      </CardContent>
       <CardFooter className="flex items-center gap-2">
-        <Button className="rounded-lg bg-blue-600 text-white hover:bg-blue-700">Play</Button>
-        <Button variant="outline" className="rounded-lg bg-transparent">
-          Save
+        <Button
+          className="rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+          onClick={() => setShowPlayer(true)}
+        >
+          Play
         </Button>
+
+        <Button variant="outline" className="rounded-lg bg-transparent">Save</Button>
+
+        {showPlayer && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70">
+            <div className="relative w-full max-w-3xl p-4 bg-white rounded-lg">
+              <button
+                className="absolute top-2 right-2 text-xl font-bold"
+                onClick={() => setShowPlayer(false)}
+              >
+                ×
+              </button>
+              <iframe
+                width="100%"
+                height="480"
+                src={`https://www.youtube.com/embed/${item.videoId}`}
+                title={item.title}
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              ></iframe>
+            </div>
+          </div>
+        )}
       </CardFooter>
     </Card>
   );
@@ -79,11 +108,6 @@ function VideoCard({ item }) {
 function ArticleCard({ item }) {
   return (
     <Card className="overflow-hidden rounded-xl border-gray-200">
-      <img
-        src={item.thumbnail || "/placeholder.svg?height=160&width=320&query=article%20thumbnail"}
-        alt={`Thumbnail for ${item.title}`}
-        className="h-40 w-full object-cover"
-      />
       <CardHeader>
         <CardTitle className="text-base text-gray-900">{item.title}</CardTitle>
       </CardHeader>
@@ -91,7 +115,14 @@ function ArticleCard({ item }) {
         {item.source && <p>Source: {item.source}</p>}
       </CardContent>
       <CardFooter className="flex items-center gap-2">
-        <Button className="rounded-lg bg-blue-600 text-white hover:bg-blue-700">Read</Button>
+        {/* Open article in a new tab */}
+        <a href={item.url} target="_blank" rel="noopener noreferrer">
+          <Button className="rounded-lg bg-blue-600 text-white hover:bg-blue-700">
+            Read
+          </Button>
+        </a>
+
+        {/* Optional save button */}
         <Button variant="outline" className="rounded-lg bg-transparent">
           Save
         </Button>

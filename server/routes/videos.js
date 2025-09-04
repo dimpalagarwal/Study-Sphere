@@ -1,8 +1,9 @@
-// server/routes/videos.js
-// import express from "express";
-// import { getVideos } from "../controllers/videosController.js";
+import express from "express";
+import { getVideos } from "../controllers/videosControllers.js";
 
-// const router = express.Router();
-// router.get("/", getVideos);
+const router = express.Router();
 
-// export default router;
+router.get("/", getVideos);
+
+export default router;
+

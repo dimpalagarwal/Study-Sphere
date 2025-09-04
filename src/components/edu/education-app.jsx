@@ -24,16 +24,39 @@ export default function EducationApp() {
     return () => clearInterval(interval);
   }, []);
 
+  // 🔹 NEW: fetch real results from backend
+  const fetchResults = async (value) => {
+  try {
+    const [videosRes, articlesRes] = await Promise.all([
+      fetch(`http://localhost:5000/api/videos?q=${value}`),
+      fetch(`http://localhost:5000/api/articles?q=${value}`)
+    ]);
+
+    const videosData = await videosRes.json();
+    const articlesData = await articlesRes.json();
+
+    setResults({
+      videos: videosData.videos,
+      articles: articlesData.articles,
+      summary: generateMockResults(value).summary,
+      mcqs: generateMockResults(value).mcqs,
+    });
+  } catch (err) {
+    console.error("Error fetching results:", err);
+  }
+};
+
+
   const handleSearch = (value) => {
     setQuery(value);
-    setResults(generateMockResults(value));
+    fetchResults(value); // 🔹 use backend fetch instead of mock
   };
 
   const emptyState = useMemo(() => !results, [results]);
 
   return (
     <section aria-label="Educational search" className="px-4 py-10">
-      {/* Hero Section with Tailwind animation */}
+      {/* Hero Section */}
       <div className="mx-auto max-w-3xl text-center">
         <h1 className="mb-3 text-pretty text-3xl font-semibold text-gray-900">
           <span className="animate-pulse text-blue-600">
@@ -52,18 +75,9 @@ export default function EducationApp() {
 
       {emptyState ? (
         <div className="mx-auto mt-12 grid max-w-5xl gap-6 md:grid-cols-3">
-          <HintCard
-            title="Watch videos"
-            desc="Get curated video explainers to learn faster."
-          />
-          <HintCard
-            title="Read articles"
-            desc="Skim key concepts with concise reads."
-          />
-          <HintCard
-            title="Practice MCQs"
-            desc="Check your understanding with interactive questions."
-          />
+          <HintCard title="Watch videos" desc="Get curated video explainers to learn faster." />
+          <HintCard title="Read articles" desc="Skim key concepts with concise reads." />
+          <HintCard title="Practice MCQs" desc="Check your understanding with interactive questions." />
         </div>
       ) : (
         <div className="mt-12">
@@ -83,16 +97,9 @@ function HintCard({ title, desc }) {
   );
 }
 
-// Mock generator to simulate results for the demo UI
+// Keep mock generator for articles, summary, and mcqs
 function generateMockResults(topic) {
   const safeTopic = topic.trim() || "Photosynthesis";
-
-  const videos = Array.from({ length: 6 }).map((_, i) => ({
-    id: `v-${i}`,
-    title: `${safeTopic} — Video Lesson ${i + 1}`,
-    thumbnail: "/educational-video-thumbnail.png",
-    duration: `${8 + i} min`,
-  }));
 
   const articles = Array.from({ length: 6 }).map((_, i) => ({
     id: `a-${i}`,
@@ -144,5 +151,5 @@ function generateMockResults(topic) {
     },
   ];
 
-  return { videos, articles, summary, mcqs };
+  return { articles, summary, mcqs };
 }

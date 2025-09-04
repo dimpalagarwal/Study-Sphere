@@ -9,8 +9,14 @@ export function Tabs({ children, defaultValue }) {
   );
 }
 
-export function TabsList({ children, className }) {
-  return <div className={`flex gap-2 ${className || ""}`}>{children}</div>;
+export function TabsList({ children, className, active, setActive }) {
+  return (
+    <div className={`flex gap-2 ${className || ""}`}>
+      {React.Children.map(children, (child) =>
+        React.cloneElement(child, { active, setActive })
+      )}
+    </div>
+  );
 }
 
 export function TabsTrigger({ children, value, active, setActive, className }) {
